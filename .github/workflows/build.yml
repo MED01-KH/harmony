@@ -44,16 +44,16 @@ jobs:
           jq -r '.site[].alerts[] | select(.risk == "High")' zap_scan.json > high_severity_alerts.json
           if [[ -s high_severity_alerts.json ]]; then
             echo "High severity vulnerabilities found!"
-            exit 1
+            echo "Creating an issue to address high severity vulnerabilities..."
+            echo "::set-output name=issue_title::High Severity Vulnerabilities Found"
+            echo "::set-output name=issue_body::High severity vulnerabilities were found in the ZAP scan. Please address them."
           else
             echo "No high severity vulnerabilities found."
           fi
 
-      - name: Upload ZAP Reports
+      - name: Create Issue for High Severity Vulnerabilities
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/create-issue@v2
         with:
-          name: zap-reports
-          path: |
-            high_severity_alerts.json
-            zap_scan.json
+          title: ${{ steps.analyze.outputs.issue_title }}
+          body: ${{ steps.analyze.outputs.issue_body }}
