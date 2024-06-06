@@ -13,6 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container at /app
 COPY . /app/
 
+# Set appropriate permissions for the copied files
+RUN chmod -R 777 /app
+
 # Create a SQLite database file
 RUN python create_database.py
 
