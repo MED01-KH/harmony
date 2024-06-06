@@ -45,15 +45,9 @@ jobs:
           if [[ -s high_severity_alerts.json ]]; then
             echo "High severity vulnerabilities found!"
             echo "Creating an issue to address high severity vulnerabilities..."
-            echo "::set-output name=issue_title::High Severity Vulnerabilities Found"
-            echo "::set-output name=issue_body::High severity vulnerabilities were found in the ZAP scan. Please address them."
+            issue_title="High Severity Vulnerabilities Found"
+            issue_body="High severity vulnerabilities were found in the ZAP scan. Please address them."
+            curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${GITHUB_REPOSITORY}/issues -d "{\"title\":\"$issue_title\",\"body\":\"$issue_body\"}"
           else
             echo "No high severity vulnerabilities found."
           fi
-
-      - name: Create Issue for High Severity Vulnerabilities
-        if: always()
-        uses: actions/create-issue@v2
-        with:
-          title: ${{ steps.analyze.outputs.issue_title }}
-          body: ${{ steps.analyze.outputs.issue_body }}
