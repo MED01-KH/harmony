@@ -26,18 +26,12 @@ jobs:
       - name: Check Docker Version
         run: docker --version
 
-      - name: Check Docker Logs
-        if: failure()
-        run: |
-          echo "Checking Docker logs..."
-          docker logs $(docker ps -q --filter "ancestor=owasp/zap2docker-stable")
-          - name: Fail on High Severity Issues
-          if: failure()
-          run: |
-            echo "Checking for high severity vulnerabilities..."
-            if grep -q '"severity": "High"' report_json.json; then
-              echo "High severity vulnerabilities found!"
-              exit 1
-            else
-              echo "No high severity vulnerabilities found."
-            fi
+
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'https://www.zaproxy.org/'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      
