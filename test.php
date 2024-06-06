@@ -1,12 +1,9 @@
-<?
-$a = htmlentities($_GET['a']);
-$b = $_GET['b'];
-$c = $_GET['c'];
-$d = htmlentities($b);
+<?php
 
-echo ($a); // safe
-echo (htmlentities($b)); // safe
-echo ($c); // XSS vulnerability
-echo ($d); // safe
-echo (htmlentities($_GET['id']); // safe
-?>
+if (PHP_SAPI === 'cli') {
+    parse_str(implode('&', array_slice($argv, 1)), $_GET);
+}
+
+if (NULL == $_GET['name']) $_GET['name'] = "Guest! ";
+
+echo 'Hello, welcome ' . $_GET['name'];
