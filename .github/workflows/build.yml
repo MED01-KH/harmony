@@ -44,10 +44,8 @@ jobs:
           jq -r '.site[].alerts[] | select(.risk == "High")' zap_scan.json > high_severity_alerts.json
           if [[ -s high_severity_alerts.json ]]; then
             echo "High severity vulnerabilities found!"
-            echo "Creating an issue to address high severity vulnerabilities..."
-            issue_title="High Severity Vulnerabilities Found"
-            issue_body="High severity vulnerabilities were found in the ZAP scan. Please address them."
-            curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${GITHUB_REPOSITORY}/issues -d "{\"title\":\"$issue_title\",\"body\":\"$issue_body\"}"
+            exit 1
           else
             echo "No high severity vulnerabilities found."
           fi
+        
