@@ -1,18 +1,27 @@
-name: ZAP Scan
+name: Build
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+
 
 jobs:
-  zap_scan:
+  build:
+    name: Build and analyze
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: ZAP Scan
-      uses: zaproxy/action-baseline@v0.10.0  # Update to the latest version
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        target: 'http://localhost:5000'
-        rules_file: '.github/zap_rules.tsv'
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # If you wish to fail your job when the Quality Gate is red, uncomment the
+      # following lines. This would typically be used to fail a deployment.
+      # - uses: sonarsource/sonarqube-quality-gate-action@master
+      #   timeout-minutes: 5
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
