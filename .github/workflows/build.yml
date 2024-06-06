@@ -55,6 +55,5 @@ jobs:
         with:
           name: zap-reports
           path: |
-            zap_scan.json
             high_severity_alerts.json
-            
+            zap_scan.json
