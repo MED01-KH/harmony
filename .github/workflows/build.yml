@@ -23,6 +23,18 @@ jobs:
     name: Scan ZAP website
     runs-on: ubuntu-latest
     steps:
-      - uses: zaproxy/action-baseline@v0.3.0
+      - name: Check Docker Version
+        run: docker --version
+
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.3.0
         with:
           target: 'https://www.zaproxy.org/'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Docker Logs
+        if: failure()
+        run: |
+          echo "Checking Docker logs..."
+          docker logs $(docker ps -q --filter "ancestor=zaproxy/zap2docker-stable")
