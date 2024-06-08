@@ -4,11 +4,8 @@ FROM python:3
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file into the container at /app
-COPY D:/GitHub_Actions/secops/requirements.txt /app/
-
-# Install any dependencies specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Flask 2.0.2 directly
+RUN pip install Flask==2.0.2
 
 # Copy the rest of the application code into the container at /app
 COPY . /app/
