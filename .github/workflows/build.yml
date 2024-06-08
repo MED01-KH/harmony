@@ -15,21 +15,21 @@ jobs:
       - name: Check Docker Version
         run: docker --version
 
-      - name: Prepare Reports
+      - name: Prepare Workspace and Reports
         run: |
-          touch report_json.json report_md.md report_html.html
-          chmod a+w report_json.json report_md.md report_html.html
+          mkdir -p $GITHUB_WORKSPACE/zap
+          chmod -R a+w $GITHUB_WORKSPACE/zap
 
       - name: Run ZAP Baseline Scan
         run: |
           docker pull ghcr.io/zaproxy/zaproxy:stable -q
-          docker run -v ${{ github.workspace }}:/zap/wrk/:rw --network=host -e ZAP_AUTH_HEADER -e ZAP_AUTH_HEADER_VALUE -e ZAP_AUTH_HEADER_SITE -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t https://www.zaproxy.org/ -J report_json.json -w report_md.md -r report_html.html
+          docker run -v $GITHUB_WORKSPACE/zap:/zap/wrk/:rw --network=host -e ZAP_AUTH_HEADER -e ZAP_AUTH_HEADER_VALUE -e ZAP_AUTH_HEADER_SITE -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t https://www.zaproxy.org/ -J /zap/wrk/report_json.json -w /zap/wrk/report_md.md -r /zap/wrk/report_html.html
 
       - name: Analyze ZAP Results
         run: |
           echo "Checking for high severity vulnerabilities..."
-          jq -r '.site[].alerts[] | select(.risk == "High")' ${{ github.workspace }}/report_json.json > ${{ github.workspace }}/high_severity_alerts.json
-          if [[ -s ${{ github.workspace }}/high_severity_alerts.json ]]; then
+          jq -r '.site[].alerts[] | select(.risk == "High")' $GITHUB_WORKSPACE/zap/report_json.json > $GITHUB_WORKSPACE/zap/high_severity_alerts.json
+          if [[ -s $GITHUB_WORKSPACE/zap/high_severity_alerts.json ]]; then
             echo "High severity vulnerabilities found!"
             exit 1
           else
