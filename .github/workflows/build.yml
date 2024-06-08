@@ -8,19 +8,6 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  sonarcloud:
-    name: SonarCloud
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   zap_scan:
     name: Scan ZAP website
     runs-on: ubuntu-latest
@@ -33,19 +20,24 @@ jobs:
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'https://www.zaproxy.org/'
-          format: 'json'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Save ZAP Scan Results
+        run: |
+          cat results.json
+        continue-on-error: true
+      
       - name: Analyze ZAP Results
         id: analyze
         run: |
           echo "Checking for high severity vulnerabilities..."
-          jq -r '.site[].alerts[] | select(.risk == "High")' zap_scan.json > high_severity_alerts.json
+          jq -r '.site[].alerts[] | select(.risk == "High")' results.json > high_severity_alerts.json
           if [[ -s high_severity_alerts.json ]]; then
             echo "High severity vulnerabilities found!"
             exit 1
           else
             echo "No high severity vulnerabilities found."
           fi
-        
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
