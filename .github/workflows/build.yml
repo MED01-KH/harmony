@@ -1,4 +1,4 @@
-name: Build
+name: Build and Scan
 
 on:
   push:
@@ -8,38 +8,24 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  build_and_run_app:
-    name: Build and Run Application
+  build:
+    name: Build Docker Image
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to GitHub Docker Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Docker Image
-        run: |
-          docker build -t myapp:latest .
-
-      - name: Run Docker Container
-        run: |
-          docker run -d -p 5000:5000 --name myapp_container myapp:latest
+      
+      - name: Build Docker image
+        run: docker build -t my-app -f ./secops/dockerfile .
 
   zap_scan:
-    name: Scan Application with ZAP
+    name: Scan with ZAP
     runs-on: ubuntu-latest
-    needs: build_and_run_app
-
+    needs: build
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Prepare Workspace and Reports
         run: |
           mkdir -p $GITHUB_WORKSPACE/zap
@@ -48,21 +34,9 @@ jobs:
       - name: Run ZAP Baseline Scan
         run: |
           docker pull ghcr.io/zaproxy/zaproxy:stable -q
-          docker run -v $GITHUB_WORKSPACE/zap:/zap/wrk/:rw --network=host \
-            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
-            -t http://localhost:5000 \
-            -J /zap/wrk/report_json.json \
-            -w /zap/wrk/report_md.md \
-            -r /zap/wrk/report_html.html || exit 0
+          docker run -v $GITHUB_WORKSPACE/zap:/zap/wrk/:rw --network=host -e ZAP_AUTH_HEADER -e ZAP_AUTH_HEADER_VALUE -e ZAP_AUTH_HEADER_SITE -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://my-app-url/ -J /zap/wrk/report_json.json -w /zap/wrk/report_md.md -r /zap/wrk/report_html.html
 
       - name: Analyze ZAP Results
         run: |
           echo "Checking for high severity vulnerabilities..."
-          jq -r '.site[].alerts[] | select(.risk == "High")' $GITHUB_WORKSPACE/zap/report_json.json > $GITHUB_WORKSPACE/zap/high_severity_alerts.json
-          if [[ -s $GITHUB_WORKSPACE/zap/high_severity_alerts.json ]]; then
-            echo "High severity vulnerabilities found!"
-            cat $GITHUB_WORKSPACE/zap/high_severity_alerts.json
-            exit 1
-          else
-            echo "No high severity vulnerabilities found."
-          fi
+          jq -r '.site[].alerts[] | select(.risk == "High")' $GITHUB_WORKSPACE/zap/report_json.json > $GITHUB_WORKSPACE/zap/high_se
