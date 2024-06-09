@@ -39,7 +39,9 @@ def login():
 @app.route('/dashboard')
 def dashboard():
     return "Welcome to the dashboard!"
-
+#if __name__ == '__main__':
+  #  create_database()
+   # app.run(debug=True)
 if __name__ == '__main__':
     create_database()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
