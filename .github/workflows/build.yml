@@ -17,9 +17,9 @@ jobs:
       
       - name: Build Docker image
         run: docker build -t my-app -f ./secops/dockerfile .
-        
+
       - name: Run Docker container
-        run: docker run -d -p 5000:5000 my-flask-app
+        run: docker run -d -p 5000:5000 my-flask
 
   zap_scan:
     name: Scan with ZAP
