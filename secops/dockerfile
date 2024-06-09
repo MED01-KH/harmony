@@ -4,8 +4,8 @@ FROM python:3
 # Set the working directory in the container
 WORKDIR /app
 
-# Install Flask 2.0.2 directly
-RUN pip install Flask==2.0.2
+# Install Flask 2.0.2 and Werkzeug 2.0.3
+RUN pip install Flask==2.0.2 Werkzeug==2.0.3
 
 # Copy the rest of the application code into the container at /app
 COPY . /app/

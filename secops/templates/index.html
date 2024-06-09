@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+</head>
+<body>
+    <h1>Welcome to the Home Page</h1>
+    {% if user %}
+        <p>Hello, {{ user.username }}!</p>
+        <p>Your email is: {{ user.email }}</p>
+    {% else %}
+        <p>No user data available</p>
+    {% endif %}
+</body>
+</html>
