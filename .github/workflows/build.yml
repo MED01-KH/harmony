@@ -14,11 +14,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        
+
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u med2205 --password-stdin
-  
+
       
+      - name: Build Docker image
+        run: docker build -t my-app -f ./secops/dockerfile .
+        
       - name: Run Docker container
         run: docker run -d -p 5000:5000 my-flask-app
 
