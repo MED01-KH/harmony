@@ -8,9 +8,17 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  setup-network:
+    name: Setup Docker Network
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Docker Network
+        run: docker network create my-network
+
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
+    needs: setup-network
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
