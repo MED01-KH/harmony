@@ -29,6 +29,9 @@ jobs:
       - name: Build Docker image
         run: docker build -t my-flask-app -f ./secops/dockerfile .
 
+      - name: Delay for Network Creation
+        run: sleep 30
+
       - name: Run Docker container
         run: docker run -d -p 5000:5000 --network my-network my-flask-app
 
