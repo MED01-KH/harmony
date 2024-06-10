@@ -8,20 +8,9 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  setup-network:
-    name: Setup Docker Network
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create Docker Network
-        run: |
-          docker network create my-network
-          # Wait until the network is created
-          while ! docker network inspect my-network &> /dev/null; do sleep 1; done
-
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
-    needs: setup-network
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -33,7 +22,7 @@ jobs:
         run: docker build -t my-flask-app -f ./secops/dockerfile .
 
       - name: Run Docker container
-        run: docker run -d -p 5000:5000 --network my-network my-flask-app
+        run: docker run -d -p 5000:5000 --network mohammed my-flask-app
 
   zap_scan:
     name: Scan with ZAP
@@ -51,7 +40,7 @@ jobs:
       - name: Run ZAP Baseline Scan
         run: |
           docker pull ghcr.io/zaproxy/zaproxy:stable -q
-          docker run -v $GITHUB_WORKSPACE/zap:/zap/wrk/:rw --network my-network -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://my-flask-app:5000/ -J /zap/wrk/report_json.json -w /zap/wrk/report_md.md -r /zap/wrk/report_html.html
+          docker run -v $GITHUB_WORKSPACE/zap:/zap/wrk/:rw --network mohammed -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://my-flask-app:5000/ -J /zap/wrk/report_json.json -w /zap/wrk/report_md.md -r /zap/wrk/report_html.html
 
       - name: Analyze ZAP Results
         run: |
