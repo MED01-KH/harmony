@@ -6,7 +6,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - .:/secops
+      - .:/app
     environment:
-      - FLASK_APP=app.py
+      - FLASK_APP=run.py
       - FLASK_ENV=development
