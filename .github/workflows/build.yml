@@ -34,7 +34,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: 'python,css,html,php'  # Updated to match your project's languages
+          languages: 'python'  # Updated to match your project's languages
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
