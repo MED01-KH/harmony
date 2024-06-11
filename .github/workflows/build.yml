@@ -25,23 +25,55 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  stackhawk:
+  codeql:
     needs: sonarcloud
+    name: "CodeQL Analysis"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'javascript'  # Change this to the languages you want to analyze
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: 'security'
+
+  semgrep:
+    needs: codeql
+    name: "Semgrep Analysis"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: "p/ci"
+
+  stackhawk:
+    needs: semgrep
     permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for stackhawk/hawkscan-action to upload code scanning alert info
+      contents: read  # for actions/checkout to fetch code
+      security-events: write  # for stackhawk/hawkscan-action to upload code scanning alert info
     name: StackHawk
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      #- name: Start your service
-       # run: docker-compose up --build --detach                  # ✏️ Update this to run your own service to be scanned
+      # Uncomment and update the following step to start your service
+      # - name: Start your service
+      #   run: docker-compose up --build --detach
 
       - name: Run HawkScan
         uses: stackhawk/hawkscan-action@4c3258cd62248dac6d9fe91dd8d45928c697dee0
-        continue-on-error: true                   # ✏️ Set to false to break your build on scan errors
+        continue-on-error: true  # Set to false to break your build on scan errors
         with:
           apiKey: ${{ secrets.HAWK_API_KEY }}
           codeScanningAlerts: true
