@@ -1,6 +1,12 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  myapp:
+  web:
+    build: .
     ports:
       - "5000:5000"
+    volumes:
+      - .:/secops
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
