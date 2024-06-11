@@ -5,11 +5,9 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  schedule:
-    - cron: '20 12 * * 0'
+ 
 
-permissions:
-  contents: read
+
 
 jobs:
   sonarcloud:
@@ -36,7 +34,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: 'javascript'  # Change this to the languages you want to analyze
+          languages: 'python,css,html,php'  # Updated to match your project's languages
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
