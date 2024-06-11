@@ -24,9 +24,12 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   codeql:
-    needs: sonarcloud
-    name: "CodeQL Analysis"
+    name: CodeQL Analysis
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -34,12 +37,20 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: 'python'  # Updated to match your project's languages
+          languages: python
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
           category: 'security'
+      - name: Upload CodeQL Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: codeql-results
+          path: results
 
   semgrep:
     needs: codeql
