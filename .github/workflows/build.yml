@@ -17,7 +17,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Uncomment and update the following step to start your service
+      - name: List files in the repository
+        run: ls -al
+
+      - name: Ensure Dockerfile exists
+        run: |
+          if [ ! -f ./Dockerfile ]; then
+            echo "Dockerfile not found!"
+            exit 1
+          fi
+
+      - name: Ensure docker-compose.yml exists
+        run: |
+          if [ ! -f ./docker-compose.yml ]; then
+            echo "docker-compose.yml not found!"
+            exit 1
+          fi
+
       - name: Start your service
         run: docker-compose up --build --detach
 
